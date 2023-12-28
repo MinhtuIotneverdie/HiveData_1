@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Data from HiveMQ</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/index.css' %}">
+</head>
+<body>
+    <div id="humidityValue">Humidity:</div>
+
+    <div class="pump">
+            <form>
+                {% csrf_token %}
+                <h2>PUMP</h2>
+                <button id="modepump" name = 'buttonPump' type="button" title="mode pump">OFF</button>
+            </form>
+    </div>
+    
+    <script>
+       // Hàm cập nhật giá trị humidity
+    function updateHumidity(value) {
+        $('#humidityValue').text('Humidity: ' + value+'%');
+    }
+
+    // Thực hiện AJAX request để lấy giá trị humidity từ server
+    function fetchHumidity() {
+        $.ajax({
+            url: '/get_humidity/',  // URL Django để xử lý yêu cầu
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                updateHumidity(data.humidity);
+            },
+            error: function (error) {
+                console.log('Error fetching humidity:', error);
+            }
+        });
+    }
+
+    // Thực hiện cập nhật giá trị humidity mỗi 5 giây
+    setInterval(fetchHumidity, 3000);
+
+    // Đảm bảo rằng giá trị humidity sẽ được cập nhật ngay từ khi trang web được tải
+    fetchHumidity(); 
+
+    // Hàm cập nhật giá trị pump
+    function sendModeToTopic(mode) {
+        $.ajax({
+            url: '/send_to_topic/',
+            method: 'POST',
+            data: {Mode: mode},
+            success: function (response) {
+                console.log('Data sent to topic successfully');
+            },
+            error: function (error) {
+                console.log('Error sending data to topic:', error);
+            }
+        });
+    }
+
+    var button_pump = document.getElementById('modepump');
+    var originalText_pump = 'OFF';
+    var newText_pump = 'ON';
+    var isClicked_pump = false;
+   button_pump.addEventListener('click', function(event) {
+    event.preventDefault();
+
+    if (isClicked_pump) {
+        button_pump.textContent = originalText_pump;
+        button_pump.title = originalText_pump;
+        button_pump.classList.remove('clicked');
+        isClicked_pump = false;
+        sendModeToTopic("0");// Gửi giá trị 0 khi click OFF
+    } else {
+        button_pump.textContent = newText_pump;
+        button_pump.title = newText_pump;
+        button_pump.classList.add('clicked');
+        isClicked_pump = true;
+        sendModeToTopic("1"); // Gửi giá trị 1 khi click ON
+    }
+});
+
+   
+    </script>
+</body>
+</html>

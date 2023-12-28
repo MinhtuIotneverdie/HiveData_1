@@ -1,0 +1,21 @@
+#myButton {
+    /* CSS mặc định cho button */
+    background-color: #d38b39;
+    color: #1a1515;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;}
+#myButton.clicked {
+    /* CSS cho button khi click */
+    background-color: #38dc38;
+    color: #362c2c;
+}
+.container{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+}
+.pump{
+    background-color: #d38b39;
+    border: 1px solid gray;
+}
